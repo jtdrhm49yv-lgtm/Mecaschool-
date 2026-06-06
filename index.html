@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MécaSchool — Plateforme de cours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1322;
+    --bg2:#111c30;
+    --card:#16233c;
+    --card2:#1b2c49;
+    --line:#243653;
+    --txt:#eaf1fb;
+    --muted:#8ba0bf;
+    --accent:#23d3a3;     /* vert mécatronique */
+    --accent2:#3b82f6;    /* bleu circuit */
+    --amber:#ffb020;
+    --danger:#ff5d6c;
+    --radius:18px;
+    --font-d:'Sora',sans-serif;
+    --font-b:'Outfit',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-b);
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(35,211,163,.14), transparent 60%),
+      radial-gradient(700px 500px at -5% 10%, rgba(59,130,246,.16), transparent 55%),
+      var(--bg);
+    color:var(--txt);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hidden{display:none!important}
+
+/* –– circuit pattern overlay –– */
+body::before{
+content:””;position:fixed;inset:0;pointer-events:none;opacity:.4;z-index:0;
+background-image:
+linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),
+linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);
+background-size:44px 44px;
+}
+.wrap{position:relative;z-index:1}
+
+/* ––––– TOPBAR ––––– */
+header.bar{
+display:flex;align-items:center;justify-content:space-between;
+padding:16px 26px;border-bottom:1px solid var(–line);
+background:rgba(12,19,34,.75);backdrop-filter:blur(10px);
+position:sticky;top:0;z-index:20;
+}
+.logo{display:flex;align-items:center;gap:12px;font-family:var(–font-d);font-weight:800;font-size:1.25rem;letter-spacing:.3px}
+.logo .gear{
+width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+background:linear-gradient(135deg,var(–accent),var(–accent2));
+box-shadow:0 6px 18px rgba(35,211,163,.35);
+}
+.logo .gear svg{width:22px;height:22px;animation:spin 9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo span b{color:var(–accent)}
+.bar-right{display:flex;align-items:center;gap:14px}
+.who{font-size:.86rem;color:var(–muted);text-align:right;line-height:1.25}
+.who b{color:var(–txt);display:block}
+.badge{font-size:.68rem;padding:3px 9px;border-radius:20px;font-weight:600;display:inline-block}
+.badge.prof{background:rgba(255,176,32,.16);color:var(–amber)}
+.badge.ok{background:rgba(35,211,163,.16);color:var(–accent)}
+.badge.wait{background:rgba(255,176,32,.16);color:var(–amber)}
+.badge.blocked{background:rgba(255,93,108,.16);color:var(–danger)}
+
+button,.btn{font-family:var(–font-b);cursor:pointer;border:none;border-radius:12px;font-weight:600;transition:.18s;font-size:.92rem}
+.btn-primary{background:linear-gradient(135deg,var(–accent),var(–accent2));color:#04121f;padding:12px 20px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(35,211,163,.3)}
+.btn-ghost{background:transparent;color:var(–muted);border:1px solid var(–line);padding:10px 16px}
+.btn-ghost:hover{color:var(–txt);border-color:var(–accent)}
+.btn-sm{padding:8px 14px;font-size:.82rem}
+.btn-ok{background:rgba(35,211,163,.15);color:var(–accent);border:1px solid rgba(35,211,163,.3)}
+.btn-ok:hover{background:var(–accent);color:#04121f}
+.btn-block{background:rgba(255,93,108,.13);color:var(–danger);border:1px solid rgba(255,93,108,.3)}
+.btn-block:hover{background:var(–danger);color:#fff}
+
+/* ––––– AUTH ––––– */
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:30px}
+.auth-card{
+width:100%;max-width:430px;background:linear-gradient(180deg,var(–card),var(–bg2));
+border:1px solid var(–line);border-radius:24px;padding:40px 34px;
+box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+.auth-logo{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:26px}
+.auth-logo .gear{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;
+background:linear-gradient(135deg,var(–accent),var(–accent2));box-shadow:0 10px 30px rgba(35,211,163,.4)}
+.auth-logo .gear svg{width:34px;height:34px;animation:spin 9s linear infinite}
+.auth-logo h1{font-family:var(–font-d);font-size:1.7rem;font-weight:800}
+.auth-logo h1 b{color:var(–accent)}
+.auth-logo p{color:var(–muted);font-size:.9rem}
+.tabs{display:flex;background:var(–bg);border-radius:12px;padding:5px;margin-bottom:24px}
+.tabs button{flex:1;padding:11px;border-radius:9px;background:transparent;color:var(–muted)}
+.tabs button.active{background:var(–card2);color:var(–txt)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.82rem;color:var(–muted);margin-bottom:7px;font-weight:500}
+.field input{
+width:100%;padding:13px 15px;background:var(–bg);border:1px solid var(–line);
+border-radius:11px;color:var(–txt);font-family:var(–font-b);font-size:.95rem;transition:.18s;
+}
+.field input:focus{outline:none;border-color:var(–accent);box-shadow:0 0 0 3px rgba(35,211,163,.15)}
+.auth-card .btn-primary{width:100%;margin-top:8px;padding:14px}
+.auth-msg{margin-top:14px;font-size:.85rem;text-align:center;min-height:18px}
+.auth-msg.err{color:var(–danger)}
+.auth-msg.ok{color:var(–accent)}
+.demo-hint{margin-top:20px;padding:13px;background:var(–bg);border:1px dashed var(–line);border-radius:11px;font-size:.78rem;color:var(–muted);line-height:1.5}
+.demo-hint b{color:var(–amber)}
+
+/* ––––– LAYOUT ––––– */
+main{max-width:1180px;margin:0 auto;padding:34px 26px 80px}
+.page-head{margin-bottom:28px}
+.page-head h2{font-family:var(–font-d);font-size:1.85rem;font-weight:800}
+.page-head p{color:var(–muted);margin-top:6px}
+
+/* ––––– COURSE GRID ––––– */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.course{
+background:linear-gradient(180deg,var(–card),var(–bg2));border:1px solid var(–line);
+border-radius:var(–radius);overflow:hidden;transition:.2s;position:relative;display:flex;flex-direction:column;
+}
+.course:hover{transform:translateY(-4px);border-color:rgba(35,211,163,.4);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.course-cover{height:140px;position:relative;display:grid;place-items:center;overflow:hidden}
+.course-cover .ico{font-size:3rem;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));z-index:1}
+.course-cover::after{content:””;position:absolute;inset:0;opacity:.9;
+background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px}
+.cv1{background:linear-gradient(135deg,#1f7a5e,#23d3a3)}
+.cv2{background:linear-gradient(135deg,#1e40af,#3b82f6)}
+.cv3{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.cv4{background:linear-gradient(135deg,#b45309,#ffb020)}
+.course-body{padding:18px 18px 20px;flex:1;display:flex;flex-direction:column}
+.course-body h3{font-family:var(–font-d);font-size:1.12rem;font-weight:700;margin-bottom:7px}
+.course-body .desc{color:var(–muted);font-size:.86rem;line-height:1.5;flex:1}
+.course-meta{display:flex;gap:14px;margin:14px 0;font-size:.78rem;color:var(–muted)}
+.course-meta span{display:flex;align-items:center;gap:5px}
+.price{font-family:var(–font-d);font-weight:700;color:var(–accent);font-size:1.05rem}
+.lock-overlay{position:absolute;top:12px;right:12px;background:rgba(12,19,34,.85);backdrop-filter:blur(4px);
+padding:6px 11px;border-radius:20px;font-size:.74rem;display:flex;align-items:center;gap:5px;border:1px solid var(–line)}
+
+/* ––––– COURSE VIEW ––––– */
+.back{display:inline-flex;align-items:center;gap:7px;color:var(–muted);margin-bottom:20px;background:none;font-size:.9rem}
+.back:hover{color:var(–accent)}
+.player{background:#000;border-radius:var(–radius);overflow:hidden;border:1px solid var(–line);aspect-ratio:16/9;margin-bottom:22px}
+.player iframe{width:100%;height:100%;border:0}
+.lesson-tabs{display:flex;gap:8px;border-bottom:1px solid var(–line);margin-bottom:20px;flex-wrap:wrap}
+.lesson-tabs button{padding:11px 18px;background:none;color:var(–muted);border-bottom:2px solid transparent;border-radius:0}
+.lesson-tabs button.active{color:var(–accent);border-bottom-color:var(–accent)}
+.resource{display:flex;align-items:center;gap:14px;padding:15px 18px;background:var(–card);border:1px solid var(–line);border-radius:13px;margin-bottom:11px}
+.resource .ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:rgba(255,93,108,.13);font-size:1.3rem}
+.resource .meta{flex:1}
+.resource .meta b{display:block;font-size:.95rem}
+.resource .meta small{color:var(–muted)}
+
+/* ––––– QUIZ ––––– */
+.quiz-q{background:var(–card);border:1px solid var(–line);border-radius:14px;padding:20px;margin-bottom:16px}
+.quiz-q .qn{font-weight:600;margin-bottom:14px}
+.quiz-q .qn span{color:var(–accent)}
+.opt{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(–line);border-radius:11px;margin-bottom:9px;cursor:pointer;transition:.15s}
+.opt:hover{border-color:var(–accent);background:var(–card2)}
+.opt.sel{border-color:var(–accent2);background:rgba(59,130,246,.12)}
+.opt.correct{border-color:var(–accent);background:rgba(35,211,163,.14)}
+.opt.wrong{border-color:var(–danger);background:rgba(255,93,108,.12)}
+.opt .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(–muted);flex-shrink:0}
+.opt.sel .dot{border-color:var(–accent2);background:var(–accent2)}
+.quiz-result{padding:20px;border-radius:14px;text-align:center;font-family:var(–font-d);font-weight:700;font-size:1.2rem;margin-top:10px}
+
+/* ––––– LOCKED / PAYWALL ––––– */
+.paywall{text-align:center;max-width:520px;margin:40px auto;background:linear-gradient(180deg,var(–card),var(–bg2));border:1px solid var(–line);border-radius:24px;padding:46px 34px}
+.paywall .big-ico{font-size:3.4rem;margin-bottom:18px}
+.paywall h3{font-family:var(–font-d);font-size:1.5rem;margin-bottom:12px}
+.paywall p{color:var(–muted);line-height:1.6;margin-bottom:8px}
+.pay-options{display:flex;gap:14px;justify-content:center;margin:24px 0}
+.pay-chip{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 22px;background:var(–bg);border:1px solid var(–line);border-radius:14px}
+.pay-chip .pi{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-family:var(–font-d);color:#fff}
+.pay-chip.wave .pi{background:#1dc8ff}
+.pay-chip.om .pi{background:#ff6600}
+.pay-chip small{color:var(–muted);font-size:.78rem}
+.contact-box{background:var(–bg);border:1px dashed var(–accent);border-radius:13px;padding:16px;margin-top:10px;font-size:.9rem}
+.contact-box b{color:var(–accent)}
+
+/* ––––– PROF DASHBOARD ––––– */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:30px}
+.stat{background:linear-gradient(180deg,var(–card),var(–bg2));border:1px solid var(–line);border-radius:16px;padding:20px}
+.stat .n{font-family:var(–font-d);font-size:2rem;font-weight:800}
+.stat .l{color:var(–muted);font-size:.85rem;margin-top:4px}
+.stat.a .n{color:var(–accent)}.stat.b .n{color:var(–amber)}.stat.c .n{color:var(–accent2)}
+
+table{width:100%;border-collapse:collapse;background:var(–card);border-radius:16px;overflow:hidden;border:1px solid var(–line)}
+th{text-align:left;padding:14px 16px;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(–muted);background:var(–bg2);font-weight:600}
+td{padding:14px 16px;border-top:1px solid var(–line);font-size:.9rem}
+td .actions{display:flex;gap:8px;flex-wrap:wrap}
+.student-name b{display:block}
+.student-name small{color:var(–muted)}
+.access-cell{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.72rem;padding:3px 9px;border-radius:14px;background:rgba(35,211,163,.13);color:var(–accent)}
+
+.sub-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.sub-tabs button{padding:10px 18px;border-radius:11px;background:var(–card);color:var(–muted);border:1px solid var(–line)}
+.sub-tabs button.active{background:linear-gradient(135deg,var(–accent),var(–accent2));color:#04121f;border-color:transparent}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(4,8,15,.7);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:50;padding:20px}
+.modal{width:100%;max-width:520px;background:linear-gradient(180deg,var(–card),var(–bg2));border:1px solid var(–line);border-radius:20px;padding:28px;max-height:90vh;overflow:auto}
+.modal h3{font-family:var(–font-d);margin-bottom:18px}
+.field textarea,.field select{width:100%;padding:12px 14px;background:var(–bg);border:1px solid var(–line);border-radius:11px;color:var(–txt);font-family:var(–font-b);font-size:.92rem}
+.field textarea{min-height:70px;resize:vertical}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+@media(max-width:640px){
+.who{display:none}
+main{padding:24px 16px 60px}
+th:nth-child(3),td:nth-child(3){display:none}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ AUTH SCREEN ============ -->
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="gear">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm9.4 4l1.9-1.5-1.9-3.3-2.3.7a7.6 7.6 0 00-1.3-.7l-.4-2.4H9.6l-.4 2.4c-.5.2-.9.4-1.3.7l-2.3-.7L3.7 10.5 5.6 12l-1.9 1.5 1.9 3.3 2.3-.7c.4.3.8.5 1.3.7l.4 2.4h4.8l.4-2.4c.5-.2.9-.4 1.3-.7l2.3.7 1.9-3.3L21.4 12z" fill="#04121f"/></svg>
+      </div>
+      <h1>Méca<b>School</b></h1>
+      <p>Plateforme de cours en mécatronique</p>
+    </div>
+
+```
+<div class="tabs">
+  <button id="tabLogin" class="active" onclick="switchAuth('login')">Connexion</button>
+  <button id="tabSignup" onclick="switchAuth('signup')">Inscription</button>
+</div>
+
+<!-- LOGIN -->
+<div id="loginForm">
+  <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="ton@email.com"></div>
+  <div class="field"><label>Mot de passe</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+  <button class="btn-primary" onclick="doLogin()">Se connecter</button>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupForm" class="hidden">
+  <div class="field"><label>Nom complet</label><input type="text" id="suName" placeholder="Ton nom"></div>
+  <div class="field"><label>Email</label><input type="email" id="suEmail" placeholder="ton@email.com"></div>
+  <div class="field"><label>Mot de passe</label><input type="password" id="suPass" placeholder="••••••••"></div>
+  <button class="btn-primary" onclick="doSignup()">Créer mon compte</button>
+</div>
+
+<div id="authMsg" class="auth-msg"></div>
+
+<div class="demo-hint">
+  <b>Première utilisation :</b><br>
+  Crée d'abord le <b>compte professeur</b> en t'inscrivant avec l'email admin défini dans l'application. Les élèves créent ensuite leur propre compte.
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============ APP (logged in) ============ -->
+
+<div id="app" class="hidden">
+  <header class="bar">
+    <div class="logo">
+      <div class="gear"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm9.4 4l1.9-1.5-1.9-3.3-2.3.7a7.6 7.6 0 00-1.3-.7l-.4-2.4H9.6l-.4 2.4c-.5.2-.9.4-1.3.7l-2.3-.7L3.7 10.5 5.6 12l-1.9 1.5 1.9 3.3 2.3-.7c.4.3.8.5 1.3.7l.4 2.4h4.8l.4-2.4c.5-.2.9-.4 1.3-.7l2.3.7 1.9-3.3L21.4 12z" fill="#04121f"/></svg></div>
+      <span>Méca<b>School</b></span>
+    </div>
+    <div class="bar-right">
+      <div class="who"><b id="wasWho">—</b><span id="waysRole">—</span></div>
+      <button class="btn-ghost btn-sm" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+
+</div>
+
+<!-- ===== Firebase SDK (compat) ===== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* =========================================================
+   MÉCASCHOOL — version connectée à Firebase
+   --------------------------------------------------------
+   POUR PERSONNALISER :
+   - PROF_EMAIL : mets ici TON email (celui qui sera "professeur")
+     Tout autre compte sera un "élève".
+   ========================================================= */
+const PROF_EMAIL = "fallgora38@gmail.com";   // <-- email administrateur (professeur)
+
+// ---- Config Firebase (la tienne) ----
+const firebaseConfig = {
+  apiKey: "AIzaSyBVJZVDaxLO6kGcDKwJFHxQ6Dh9IZbu0SU",
+  authDomain: "mecaschool-116bc.firebaseapp.com",
+  projectId: "mecaschool-116bc",
+  storageBucket: "mecaschool-116bc.firebasestorage.app",
+  messagingSenderId: "285313915644",
+  appId: "1:285313915644:web:792f9b57da09583efcd579"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ---------- ÉTAT LOCAL (rempli depuis Firestore) ----------
+let CURRENT = null;            // { uid, name, email, role, access:[] }
+let COURSES = [];              // liste des cours chargés
+let ALL_USERS = [];            // pour le prof : tous les élèves
+
+// =========================================================
+//  AUTH UI
+// =========================================================
+function switchAuth(which){
+  document.getElementById('tabLogin').classList.toggle('active', which==='login');
+  document.getElementById('tabSignup').classList.toggle('active', which==='signup');
+  document.getElementById('loginForm').classList.toggle('hidden', which!=='login');
+  document.getElementById('signupForm').classList.toggle('hidden', which!=='signup');
+  msg('');
+}
+function msg(t,type){const m=document.getElementById('authMsg');m.textContent=t||'';m.className='auth-msg '+(type||'');}
+function val(id){return document.getElementById(id).value.trim();}
+
+// ---- INSCRIPTION ----
+async function doSignup(){
+  const name=val('suName'), email=val('suEmail').toLowerCase(), pass=val('suPass');
+  if(!name||!email||!pass){msg('Remplis le nom, l\'email et le mot de passe.','err');return;}
+  if(pass.length<6){msg('Le mot de passe doit faire au moins 6 caractères.','err');return;}
+  msg('Création du compte…');
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const role = (email===PROF_EMAIL.toLowerCase()) ? 'prof' : 'student';
+    await db.collection('users').doc(cred.user.uid).set({
+      name, email, role, access:[], createdAt: Date.now()
+    });
+    msg('Compte créé ! Connexion…','ok');
+    // onAuthStateChanged prend le relais
+  }catch(e){ msg(traduireErreur(e),'err'); }
+}
+
+// ---- CONNEXION ----
+async function doLogin(){
+  const email=val('loginEmail').toLowerCase(), pass=val('loginPass');
+  if(!email||!pass){msg('Entre ton email et ton mot de passe.','err');return;}
+  msg('Connexion…');
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+  }catch(e){ msg(traduireErreur(e),'err'); }
+}
+
+function logout(){ auth.signOut(); }
+
+function traduireErreur(e){
+  const c=e.code||'';
+  if(c.includes('email-already-in-use')) return 'Cet email a déjà un compte.';
+  if(c.includes('invalid-email')) return 'Email invalide.';
+  if(c.includes('weak-password')) return 'Mot de passe trop faible (min. 6 caractères).';
+  if(c.includes('user-not-found')||c.includes('wrong-password')||c.includes('invalid-credential'))
+    return 'Email ou mot de passe incorrect.';
+  if(c.includes('too-many-requests')) return 'Trop de tentatives, réessaie plus tard.';
+  if(c.includes('network')) return 'Problème de connexion internet.';
+  return 'Erreur : '+(e.message||c);
+}
+
+// =========================================================
+//  SESSION : réagit à la connexion / déconnexion
+// =========================================================
+auth.onAuthStateChanged(async (user)=>{
+  if(!user){
+    CURRENT=null;
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('authScreen').classList.remove('hidden');
+    return;
+  }
+  // charge le profil Firestore
+  let snap = await db.collection('users').doc(user.uid).get();
+  if(!snap.exists){
+    // profil manquant (compte créé hors app) : on le crée
+    const role = (user.email.toLowerCase()===PROF_EMAIL.toLowerCase())?'prof':'student';
+    await db.collection('users').doc(user.uid).set({
+      name:user.email.split('@')[0], email:user.email, role, access:[], createdAt:Date.now()
+    });
+    snap = await db.collection('users').doc(user.uid).get();
+  }
+  const d=snap.data();
+  CURRENT={ uid:user.uid, name:d.name, email:d.email, role:d.role, access:d.access||[] };
+  await enterApp();
+});
+
+async function enterApp(){
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('wasWho').textContent=CURRENT.name;
+  document.getElementById('waysRole').innerHTML = CURRENT.role==='prof'
+    ? '<span class="badge prof">Professeur</span>'
+    : '<span class="badge ok">Élève</span>';
+  await loadCourses();
+  if(CURRENT.role==='prof'){ await renderProf(); }
+  else { renderStudentHome(); }
+}
+
+// =========================================================
+//  CHARGEMENT DES DONNÉES
+// =========================================================
+async function loadCourses(){
+  const qs = await db.collection('courses').orderBy('createdAt','asc').get();
+  COURSES = qs.docs.map(doc=>({id:doc.id, ...doc.data()}));
+  // si aucun cours, on en sème quelques-uns une seule fois
+  if(COURSES.length===0 && CURRENT.role==='prof'){
+    await seedCourses();
+    const qs2 = await db.collection('courses').orderBy('createdAt','asc').get();
+    COURSES = qs2.docs.map(doc=>({id:doc.id, ...doc.data()}));
+  }
+}
+
+async function seedCourses(){
+  const demo=[
+    {title:'Bases de l\'électronique', icon:'⚡', cover:'cv1', price:'10 000 FCFA',
+     desc:'Composants, lois fondamentales et premiers montages, expliqués avec l\'analogie de l\'eau.',
+     video:'https://www.youtube.com/embed/dQw4w9WgXcQ',
+     pdfs:[], quiz:[{q:'Que mesure-t-on en Ampères ?',opts:['La tension','Le courant','La résistance'],correct:1}]},
+    {title:'Capteurs & Arduino', icon:'🤖', cover:'cv2', price:'15 000 FCFA',
+     desc:'Programmer un microcontrôleur, lire des capteurs industriels et bâtir un mini système de monitoring.',
+     video:'https://www.youtube.com/embed/dQw4w9WgXcQ',
+     pdfs:[], quiz:[{q:'La fonction qui tourne en boucle ?',opts:['setup()','loop()','main()'],correct:1}]},
+  ];
+  let t=Date.now();
+  for(const c of demo){ await db.collection('courses').add({...c, lessons:1, createdAt:t++}); }
+}
+
+// =========================================================
+//  ESPACE ÉLÈVE
+// =========================================================
+function renderStudentHome(){
+  const v=document.getElementById('view');
+  const cards = COURSES.map(c=>{
+    const has = CURRENT.access.includes(c.id);
+    return `
+    <div class="course" onclick="openCourse('${c.id}')">
+      <div class="course-cover ${c.cover||'cv1'}"><div class="ico">${c.icon||'⚙️'}</div></div>
+      <div class="lock-overlay">${has?'🔓 Débloqué':'🔒 Verrouillé'}</div>
+      <div class="course-body">
+        <h3>${esc(c.title)}</h3>
+        <p class="desc">${esc(c.desc||'')}</p>
+        <div class="course-meta">
+          <span>🎬 ${c.lessons||1} vidéo(s)</span>
+          <span>📄 ${(c.pdfs||[]).length} PDF</span>
+          <span>📝 quiz</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="price">${esc(c.price||'—')}</span>
+          <button class="btn-primary btn-sm">${has?'Suivre ▶':'Voir détails'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  v.innerHTML=`
+    <div class="page-head"><h2>Bonjour ${esc(CURRENT.name.split(' ')[0])} 👋</h2><p>Choisis un cours pour commencer ton apprentissage.</p></div>
+    <div class="grid">${cards||'<p style="color:var(--muted)">Aucun cours disponible pour l\'instant.</p>'}</div>`;
+}
+
+function openCourse(id){
+  const c=COURSES.find(x=>x.id===id);
+  const has=CURRENT.access.includes(id);
+  const v=document.getElementById('view');
+  if(!has){ v.innerHTML = paywall(c); return; }
+  v.innerHTML=`
+    <button class="back" onclick="renderStudentHome()">← Retour aux cours</button>
+    <div class="page-head"><h2>${c.icon||''} ${esc(c.title)}</h2><p>${esc(c.desc||'')}</p></div>
+    <div class="player"><iframe src="${c.video||''}" allowfullscreen></iframe></div>
+    <div class="lesson-tabs">
+      <button class="active" onclick="lessonTab(this,'res','${id}')">📄 Ressources</button>
+      <button onclick="lessonTab(this,'quiz','${id}')">📝 Quiz</button>
+    </div>
+    <div id="lessonContent"></div>`;
+  renderResources(id);
+}
+function lessonTab(btn,which,id){
+  document.querySelectorAll('.lesson-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(which==='res') renderResources(id); else renderQuiz(id);
+}
+function renderResources(id){
+  const c=COURSES.find(x=>x.id===id);
+  const pdfs=c.pdfs||[];
+  document.getElementById('lessonContent').innerHTML = pdfs.length
+    ? pdfs.map(p=>`
+      <div class="resource">
+        <div class="ico">📄</div>
+        <div class="meta"><b>${esc(p.name)}</b><small>${esc(p.size||'')}</small></div>
+        ${p.url?`<a class="btn-ghost btn-sm" href="${p.url}" target="_blank" style="text-decoration:none">Ouvrir</a>`
+               :`<button class="btn-ghost btn-sm" onclick="alert('Lien PDF non encore ajouté.')">Indisponible</button>`}
+      </div>`).join('')
+    : '<p style="color:var(--muted)">Aucune ressource pour ce cours.</p>';
+}
+function renderQuiz(id){
+  const c=COURSES.find(x=>x.id===id);
+  const quiz=c.quiz||[];
+  if(!quiz.length){document.getElementById('lessonContent').innerHTML='<p style="color:var(--muted)">Aucun quiz pour ce cours.</p>';return;}
+  const html=quiz.map((q,qi)=>`
+    <div class="quiz-q" data-correct="${q.correct}" data-qi="${qi}">
+      <div class="qn"><span>Q${qi+1}.</span> ${esc(q.q)}</div>
+      ${q.opts.map((o,oi)=>`<div class="opt" onclick="pickOpt(this,${qi})" data-oi="${oi}"><div class="dot"></div>${esc(o)}</div>`).join('')}
+    </div>`).join('');
+  document.getElementById('lessonContent').innerHTML = html +
+    `<button class="btn-primary" onclick="submitQuiz('${id}')">Valider mes réponses</button><div id="quizResult"></div>`;
+}
+let quizPicks={};
+function pickOpt(el,qi){
+  el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel'); quizPicks[qi]=parseInt(el.dataset.oi);
+}
+function submitQuiz(id){
+  const c=COURSES.find(x=>x.id===id);let score=0;
+  document.querySelectorAll('.quiz-q').forEach(qd=>{
+    const qi=parseInt(qd.dataset.qi),correct=parseInt(qd.dataset.correct);
+    qd.querySelectorAll('.opt').forEach(o=>{
+      const oi=parseInt(o.dataset.oi);
+      if(oi===correct)o.classList.add('correct');
+      if(quizPicks[qi]===oi&&oi!==correct)o.classList.add('wrong');
+    });
+    if(quizPicks[qi]===correct)score++;
+  });
+  const total=(c.quiz||[]).length;
+  const pct=Math.round(score/total*100);const ok=pct>=50;
+  document.getElementById('quizResult').innerHTML=
+    `<div class="quiz-result" style="background:${ok?'rgba(35,211,163,.14)':'rgba(255,176,32,.14)'};color:${ok?'var(--accent)':'var(--amber)'}">
+      ${ok?'🎉':'💪'} Score : ${score}/${total} (${pct}%)</div>`;
+  quizPicks={};
+}
+
+function paywall(c){
+  return `
+  <button class="back" onclick="renderStudentHome()">← Retour aux cours</button>
+  <div class="paywall">
+    <div class="big-ico">🔒</div>
+    <h3>${esc(c.title)}</h3>
+    <p>Ce cours est <b style="color:var(--amber)">verrouillé</b>. Pour y accéder, effectue le paiement de <b style="color:var(--accent)">${esc(c.price||'')}</b> puis attends la validation du professeur.</p>
+    <div class="pay-options">
+      <div class="pay-chip wave"><div class="pi">W</div><b>Wave</b><small>77 000 00 00</small></div>
+      <div class="pay-chip om"><div class="pi">OM</div><b>Orange Money</b><small>77 000 00 00</small></div>
+    </div>
+    <div class="contact-box">
+      📲 Après paiement, envoie une capture sur WhatsApp au <b>+221 77 000 00 00</b>.<br>
+      Le professeur validera ton accès et le cours se débloquera ici.
+    </div>
+  </div>`;
+}
+
+// =========================================================
+//  ESPACE PROF
+// =========================================================
+let profTab='students';
+async function renderProf(){
+  const v=document.getElementById('view');
+  // charge tous les élèves
+  const us = await db.collection('users').get();
+  ALL_USERS = us.docs.map(doc=>({uid:doc.id, ...doc.data()})).filter(u=>u.role==='student');
+  const validated=ALL_USERS.filter(s=>(s.access||[]).length>0).length;
+  const waiting=ALL_USERS.filter(s=>(s.access||[]).length===0).length;
+  v.innerHTML=`
+    <div class="page-head"><h2>Tableau de bord 🛠️</h2><p>Gère tes élèves, leurs accès et tes cours.</p></div>
+    <div class="stats">
+      <div class="stat a"><div class="n">${ALL_USERS.length}</div><div class="l">Élèves inscrits</div></div>
+      <div class="stat c"><div class="n">${validated}</div><div class="l">Avec accès</div></div>
+      <div class="stat b"><div class="n">${waiting}</div><div class="l">En attente</div></div>
+      <div class="stat"><div class="n">${COURSES.length}</div><div class="l">Cours en ligne</div></div>
+    </div>
+    <div class="sub-tabs">
+      <button class="${profTab==='students'?'active':''}" onclick="setProfTab('students')">👥 Élèves & accès</button>
+      <button class="${profTab==='courses'?'active':''}" onclick="setProfTab('courses')">📚 Mes cours</button>
+    </div>
+    <div id="profContent"></div>`;
+  if(profTab==='students') renderStudentTable(); else renderCourseTable();
+}
+function setProfTab(t){profTab=t;renderProf();}
+
+function renderStudentTable(){
+  const rows=ALL_USERS.map(s=>{
+    const acc=s.access||[];
+    const accessChips = acc.length
+      ? acc.map(cid=>{const c=COURSES.find(x=>x.id===cid);return `<span class="chip">${c?esc(c.title):cid}</span>`}).join('')
+      : '<span class="badge wait">Aucun accès</span>';
+    return `<tr>
+      <td class="student-name"><b>${esc(s.name)}</b><small>${esc(s.email)}</small></td>
+      <td class="access-cell">${accessChips}</td>
+      <td><div class="actions"><button class="btn-sm btn-ok" onclick="manageAccess('${s.uid}')">Gérer l'accès</button></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('profContent').innerHTML=`
+    <table><thead><tr><th>Élève</th><th>Cours débloqués</th><th>Action</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="3">Aucun élève inscrit pour l\'instant.</td></tr>'}</tbody></table>`;
+}
+
+function manageAccess(uid){
+  const u=ALL_USERS.find(x=>x.uid===uid);
+  const acc=u.access||[];
+  const list=COURSES.map(c=>{
+    const has=acc.includes(c.id);
+    return `<div class="resource">
+      <div class="ico" style="background:rgba(35,211,163,.13)">${c.icon||'⚙️'}</div>
+      <div class="meta"><b>${esc(c.title)}</b><small>${esc(c.price||'')}</small></div>
+      ${has
+        ? `<button class="btn-sm btn-block" onclick="toggleAccess('${uid}','${c.id}',false)">Retirer</button>`
+        : `<button class="btn-sm btn-ok" onclick="toggleAccess('${uid}','${c.id}',true)">✓ Autoriser</button>`}
+    </div>`;
+  }).join('');
+  showModal(`<h3>Accès de ${esc(u.name)}</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">Coche les cours payés pour les débloquer chez l'élève.</p>
+    ${list}
+    <div class="modal-actions"><button class="btn-primary btn-sm" onclick="closeModal();renderProf()">Terminé</button></div>`);
+}
+async function toggleAccess(uid,cid,grant){
+  const u=ALL_USERS.find(x=>x.uid===uid);
+  let acc=u.access||[];
+  if(grant){ if(!acc.includes(cid)) acc.push(cid); }
+  else { acc=acc.filter(x=>x!==cid); }
+  u.access=acc;
+  await db.collection('users').doc(uid).update({access:acc});
+  manageAccess(uid); // rafraîchit la fenêtre
+}
+
+function renderCourseTable(){
+  const rows=COURSES.map(c=>`<tr>
+    <td class="student-name"><b>${c.icon||''} ${esc(c.title)}</b><small>${esc((c.desc||'').slice(0,50))}…</small></td>
+    <td>${esc(c.price||'—')}</td>
+    <td>${(c.pdfs||[]).length} PDF · ${(c.quiz||[]).length} questions</td>
+    <td><div class="actions"><button class="btn-sm btn-block" onclick="deleteCourse('${c.id}','${esc(c.title)}')">Supprimer</button></div></td>
+  </tr>`).join('');
+  document.getElementById('profContent').innerHTML=`
+    <table><thead><tr><th>Cours</th><th>Prix</th><th>Contenu</th><th>Action</th></tr></thead><tbody>${rows||'<tr><td colspan="4">Aucun cours.</td></tr>'}</tbody></table>
+    <div style="margin-top:18px"><button class="btn-primary" onclick="addCourseModal()">+ Ajouter un cours</button></div>`;
+}
+function addCourseModal(){
+  showModal(`<h3>Ajouter un cours</h3>
+    <div class="field"><label>Titre</label><input id="ncTitle" placeholder="Ex : Systèmes pneumatiques"></div>
+    <div class="field"><label>Description</label><textarea id="ncDesc" placeholder="Courte description..."></textarea></div>
+
+```
+<div class="field"><label>Prix</label><input id="ncPrice" placeholder="15 000 FCFA"></div>
+<div class="field"><label>Lien vidéo (YouTube — format intégré)</label><input id="ncVideo" placeholder="https://www.youtube.com/embed/XXXX"></div>
+<div class="field"><label>Icône (emoji)</label><input id="ncIcon" placeholder="⚙️" maxlength="2"></div>
+<div class="modal-actions">
+  <button class="btn-ghost btn-sm" onclick="closeModal()">Annuler</button>
+  <button class="btn-primary btn-sm" onclick="saveCourse()">Créer</button>
+</div>`);
+```
+
+}
+async function saveCourse(){
+const t=document.getElementById(‘ncTitle’).value.trim();
+if(!t){alert(‘Donne au moins un titre.’);return;}
+const covers=[‘cv1’,‘cv2’,‘cv3’,‘cv4’];
+let video=document.getElementById(‘ncVideo’).value.trim();
+// convertit un lien youtube classique en lien intégrable
+video = toEmbed(video);
+await db.collection(‘courses’).add({
+title:t,
+desc:document.getElementById(‘ncDesc’).value.trim()||‘Nouveau cours.’,
+price:document.getElementById(‘ncPrice’).value.trim()||’—’,
+video:video||’’,
+icon:document.getElementById(‘ncIcon’).value.trim()||‘⚙️’,
+cover:covers[Math.floor(Math.random()*4)], lessons:1, pdfs:[], quiz:[],
+createdAt:Date.now()
+});
+closeModal();
+await loadCourses();
+renderProf();
+}
+async function deleteCourse(id,title){
+if(!confirm(‘Supprimer le cours « ‘+title+’ » ? Cette action est définitive.’))return;
+await db.collection(‘courses’).doc(id).delete();
+await loadCourses();
+renderProf();
+}
+function toEmbed(url){
+if(!url) return ‘’;
+// youtu.be/ID  ou  watch?v=ID  ->  embed/ID
+let m = url.match(/(?:youtu.be/|[?&]v=)([\w-]{11})/);
+if(m) return ‘https://www.youtube.com/embed/’+m[1];
+return url; // déjà au bon format ou autre plateforme
+}
+
+// =========================================================
+//  HELPERS
+// =========================================================
+function esc(s){return (s||’’).toString().replace(/[&<>”’]/g,m=>({’&’:’&’,’<’:’<’,’>’:’>’,’”’:’"’,”’”:’'’}[m]));}
+function showModal(html){
+const d=document.createElement(‘div’);d.className=‘modal-bg’;d.id=‘modalBg’;
+d.innerHTML=`<div class="modal">${html}</div>`;
+d.onclick=e=>{if(e.target===d)closeModal();};
+document.body.appendChild(d);
+}
+function closeModal(){const m=document.getElementById(‘modalBg’);if(m)m.remove();}
+
+document.getElementById(‘loginPass’).addEventListener(‘keydown’,e=>{if(e.key===‘Enter’)doLogin();});
+document.getElementById(‘suPass’).addEventListener(‘keydown’,e=>{if(e.key===‘Enter’)doSignup();});
+</script>
+
+</body>
+</html>
