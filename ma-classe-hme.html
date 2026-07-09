@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ma Classe — Formation HME</title>
+<style>
+  :root {
+    --bg: #0b1f22;
+    --panel: #102a2e;
+    --panel-2: #143438;
+    --line: #1f4448;
+    --ink: #e8f2f1;
+    --muted: #8fb0ad;
+    --amber: #fbbf24;
+    --amber-deep: #f59e0b;
+    --teal: #2dd4bf;
+    --ok: #34d399;
+    --bad: #f87171;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: 84px;
+  }
+  .hidden { display: none !important; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+  /* ===== En-tête ===== */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,31,34,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .brand { font-weight: 800; letter-spacing: 0.02em; }
+  .brand small { display: block; color: var(--muted); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .role-badge {
+    font-size: 0.78rem; font-weight: 800;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+    white-space: nowrap;
+  }
+  .role-badge.formateur { background: rgba(251,191,36,0.14); border-color: rgba(251,191,36,0.5); color: var(--amber); }
+  .live-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #475569; margin-right: 6px; vertical-align: 1px; }
+  .live-dot.on { background: var(--bad); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5);} 50% { box-shadow: 0 0 0 7px rgba(248,113,113,0);} }
+
+  /* ===== Cartes / éléments ===== */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .eyebrow { color: var(--amber); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 1.5rem; margin: 0 0 8px; }
+  h2 { font-size: 1.18rem; margin: 0 0 10px; }
+  h3 { font-size: 1.02rem; margin: 0 0 8px; }
+  p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.86rem; }
+  input[type=text], input[type=url], input[type=number], input[type=password], textarea, select {
+    width: 100%;
+    background: #0d2427;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--ink);
+    padding: 12px 14px;
+    font-size: 1rem;
+    font-family: inherit;
+    margin: 6px 0 12px;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+  label { font-weight: 700; font-size: 0.92rem; }
+  .btn {
+    display: inline-block;
+    background: var(--amber-deep);
+    color: #1a1203;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 22px;
+    font-size: 1rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost { background: none; color: var(--teal); border: 1px solid var(--line); }
+  .btn.danger { background: rgba(248,113,113,0.15); color: var(--bad); border: 1px solid rgba(248,113,113,0.4); }
+  .btn.block { display: block; width: 100%; text-align: center; }
+  .btn.sm { padding: 8px 14px; font-size: 0.88rem; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .spacer { flex: 1; }
+  .pill { font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+  .pill.ok { background: rgba(52,211,153,0.15); color: var(--ok); }
+  .pill.warn { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .pill.off { background: var(--panel-2); color: var(--muted); }
+  code { background: #0d2427; border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; font-size: 0.9em; }
+
+  /* ===== Barre d'onglets ===== */
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+    background: rgba(13,36,39,0.97);
+    border-top: 1px solid var(--line);
+    display: flex;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tabbar button {
+    flex: 1;
+    background: none; border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 6px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+  }
+  .tabbar button .ico { display: block; font-size: 1.35rem; margin-bottom: 2px; }
+  .tabbar button.active { color: var(--amber); background: rgba(251,191,36,0.08); }
+
+  /* ===== Écran Direct ===== */
+  .module-console {
+    text-align: center;
+    background: linear-gradient(160deg, #12363b, #0d2427);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 16px;
+    margin: 14px 0;
+  }
+  .module-num {
+    font-size: 4.2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--amber);
+    letter-spacing: -0.02em;
+    transition: transform 0.25s ease;
+  }
+  .module-num.bump { transform: scale(1.18); }
+  .module-rail { display: flex; gap: 5px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .module-rail span {
+    width: 22px; height: 8px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--line);
+  }
+  .module-rail span.done { background: var(--amber-deep); border-color: var(--amber-deep); }
+  .chat {
+    height: 300px; overflow-y: auto;
+    background: #0d2427; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px; margin-bottom: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; background: var(--panel-2); font-size: 0.94rem; }
+  .msg .who { font-size: 0.72rem; font-weight: 800; color: var(--teal); display: block; }
+  .msg.me { align-self: flex-end; background: #1c4a41; }
+  .msg.formateur { border: 1px solid rgba(251,191,36,0.5); }
+  .msg.formateur .who { color: var(--amber); }
+  .annonce {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.45);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 12px 0;
+  }
+  .quiz-opt {
+    display: block; width: 100%; text-align: left;
+    background: var(--panel-2); color: var(--ink);
+    border: 2px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin: 8px 0;
+    font-size: 1rem; font-family: inherit; cursor: pointer;
+  }
+  .quiz-opt.sel { border-color: var(--amber); background: rgba(251,191,36,0.1); }
+  .bar-line { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.9rem; }
+  .bar-line .bar { flex: 1; height: 12px; background: var(--panel-2); border-radius: 999px; overflow: hidden; }
+  .bar-line .bar i { display: block; height: 100%; background: var(--teal); border-radius: 999px; }
+
+  /* ===== Listes ===== */
+  .item { border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 10px 0; background: var(--panel-2); }
+  .item h3 { margin-bottom: 4px; }
+  .photo-thumb { max-width: 100%; border-radius: 12px; border: 1px solid var(--line); margin-top: 8px; }
+  .note-big { font-size: 1.6rem; font-weight: 900; color: var(--amber); }
+  .toast {
+    position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%);
+    background: #143438; border: 1px solid var(--teal); color: var(--ink);
+    padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 0.92rem;
+    z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .toast.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">⚡ Ma Classe<small>Formation HME · G. Fall</small></div>
+  <div class="row" style="gap:8px;">
+    <span id="liveBadge" class="role-badge"><span class="live-dot" id="liveDot"></span><span id="liveTxt">Hors direct</span></span>
+    <span id="roleBadge" class="role-badge hidden"></span>
+  </div>
+</div>
+
+<!-- ================= ÉCRAN CONFIGURATION (1er lancement) ================= -->
+<div id="screen-setup" class="wrap hidden">
+  <div class="card">
+    <div class="eyebrow">Installation · Formateur uniquement</div>
+    <h1>Connecter la plateforme à Firebase</h1>
+    <p class="muted">Cette page est vide tant qu'elle n'est pas reliée à ton projet Firebase (tu peux réutiliser le projet MécaSchool).</p>
+    <ol class="small">
+      <li>Console Firebase → ⚙️ Paramètres du projet → «&nbsp;Vos applications&nbsp;» → application Web → copier l'objet <code>firebaseConfig</code>.</li>
+      <li>Ouvrir ce fichier HTML et coller les valeurs dans le bloc <code>FIREBASE_CONFIG</code> tout en haut du script (repère 🔧).</li>
+      <li>Firebase → Authentication → Méthodes de connexion → activer <strong>Anonyme</strong>.</li>
+      <li>Firestore → Règles → coller les règles fournies en commentaire au même endroit du script.</li>
+      <li>Redéployer sur GitHub Pages. C'est tout.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= ÉCRAN CONNEXION ================= -->
+<div id="screen-login" class="wrap hidden">
+  <div class="card">
+    <div class="eyebrow">Bienvenue</div>
+    <h1>Rejoindre la classe</h1>
+    <label for="inNom">Ton prénom et nom</label>
+    <input type="text" id="inNom" placeholder="Ex : Moussa Diallo" autocomplete="name">
+    <label for="inCode">Code de la classe</label>
+    <input type="text" id="inCode" placeholder="Code donné par le formateur" autocapitalize="characters">
+    <button class="btn block" id="btnJoin">Entrer dans la classe</button>
+    <p class="small muted" style="text-align:center; margin-top:14px;">
+      <button class="btn ghost sm" id="btnLoginFormateur">🔐 Je suis le formateur</button>
+    </p>
+  </div>
+</div>
+
+<!-- ================= APPLICATION ================= -->
+<div id="app" class="hidden">
+
+  <!-- ===== Onglet Accueil ===== -->
+  <div id="tab-accueil" class="wrap tab">
+    <div class="card">
+      <div class="eyebrow">Accueil</div>
+      <h1 id="helloTitre">Bonjour 👋</h1>
+      <p id="helloSession" class="muted">Aucune séance en direct pour le moment.</p>
+      <div id="helloAnnonce" class="annonce hidden"></div>
+      <button class="btn block hidden" id="btnGoDirect">🔴 Rejoindre la séance en direct</button>
+    </div>
+    <div class="card" id="cardStatsEleve">
+      <h2>Mes exercices</h2>
+      <p class="muted small" id="statExos">—</p>
+    </div>
+    <div class="card">
+      <h2>À propos</h2>
+      <p class="small muted">Plateforme de formation en maintenance HME. Les cours restent disponibles à tout moment dans l'onglet 📚 Cours. Pendant les séances en direct, le formateur débloque les modules, anime le tchat et lance des quiz — le tout sans vidéo, très léger en données.</p>
+      <button class="btn ghost sm" id="btnLogout">Changer d'utilisateur</button>
+    </div>
+  </div>
+
+  <!-- ===== Onglet Cours ===== -->
+  <div id="tab-cours" class="wrap tab hidden">
+    <div class="card">
+      <div class="eyebrow">Bibliothèque</div>
+      <h1>📚 Les cours</h1>
+      <p class="muted small">Chaque cours s'ouvre dans un nouvel onglet. La progression par modules se gère à l'intérieur du cours.</p>
+    </div>
+    <div id="listeCours"></div>
+    <div class="card hidden formateur-only" id="cardAjoutCours">
+      <h2>➕ Ajouter un cours</h2>
+      <label>Titre</label>
+      <input type="text" id="coursTitre" placeholder="Ex : L'alimentation à découpage">
+      <label>Description courte</label>
+      <input type="text" id="coursDesc" placeholder="Ex : 11 modules · quiz · TP multimètre">
+      <label>Lien (GitHub Pages)</label>
+      <input type="url" id="coursUrl" placeholder="https://jtdrhm49yv-lgtm.github.io/...">
+      <button class="btn" id="btnAjoutCours">Publier le cours</button>
+    </div>
+  </div>
+
+  <!-- ===== Onglet Direct ===== -->
+  <div id="tab-direct" class="wrap tab hidden">
+
+    <div class="card hidden" id="cardPasDeDirect">
+      <div class="eyebrow">Direct</div>
+      <h1>🔴 Séance en direct</h1>
+      <p class="muted">Aucune séance en cours. <span class="eleve-only">Reviens quand le formateur aura lancé la séance — cette page s'activera toute seule.</span></p>
+      <div class="formateur-only hidden">
+        <label>Cours de la séance</label>
+        <select id="selCoursDirect"></select>
+        <label>Nombre de modules du cours</label>
+        <input type="number" id="inNbModules" value="11" min="1" max="40">
+        <button class="btn block" id="btnStartDirect">▶️ Démarrer la séance</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="zoneDirect">
+      <div class="module-console">
+        <div class="eyebrow" id="directCoursTitre">Séance en direct</div>
+        <div class="muted small">Modules débloqués</div>
+        <div class="module-num" id="moduleNum">1</div>
+        <div class="module-rail" id="moduleRail"></div>
+        <div class="row" style="justify-content:center;">
+          <a class="btn sm" id="btnOuvrirCours" target="_blank" rel="noopener">📖 Ouvrir le cours</a>
+          <button class="btn secondary sm formateur-only hidden" id="btnModuleMoins">−</button>
+          <button class="btn sm formateur-only hidden" id="btnModulePlus">🔓 Module suivant</button>
+        </div>
+      </div>
+
+      <div id="directAnnonce" class="annonce hidden"></div>
+      <div class="card formateur-only hidden">
+        <h3>📣 Annonce aux élèves</h3>
+        <input type="text" id="inAnnonce" placeholder="Ex : Prenez vos multimètres, TP dans 5 min">
+        <div class="row">
+          <button class="btn sm" id="btnEnvoyerAnnonce">Publier</button>
+          <button class="btn ghost sm" id="btnEffacerAnnonce">Effacer</button>
+        </div>
+      </div>
+
+      <!-- Quiz en direct -->
+      <div class="card" id="cardQuiz">
+        <h2>⚡ Quiz éclair</h2>
+        <div id="quizEleve" class="eleve-only">
+          <p class="muted small" id="quizAttente">Pas de quiz en cours — le formateur peut en lancer un à tout moment.</p>
+          <div id="quizZone" class="hidden">
+            <p id="quizQuestion" style="font-weight:700;"></p>
+            <div id="quizOptions"></div>
+            <p class="small muted" id="quizEtatReponse"></p>
+          </div>
+        </div>
+        <div class="formateur-only hidden" id="quizFormateur">
+          <div id="quizCreation">
+            <label>Question</label>
+            <input type="text" id="qQuestion" placeholder="Ex : Quelle tension sur le gros condensateur ?">
+            <label>Réponses (une par ligne, ✅ devant la bonne)</label>
+            <textarea id="qOptions" placeholder="230 V&#10;✅ 325 V&#10;115 V"></textarea>
+            <button class="btn" id="btnLancerQuiz">🚀 Lancer le quiz</button>
+          </div>
+          <div id="quizResultats" class="hidden">
+            <p style="font-weight:700;" id="qrQuestion"></p>
+            <div id="qrBars"></div>
+            <p class="small muted" id="qrTotal"></p>
+            <div class="row">
+              <button class="btn secondary sm" id="btnRevelerQuiz">🎯 Révéler la bonne réponse</button>
+              <button class="btn ghost sm" id="btnFermerQuiz">Terminer le quiz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tchat -->
+      <div class="card">
+        <h2>💬 Tchat de séance</h2>
+        <div class="chat" id="chatBox"></div>
+        <div class="row">
+          <input type="text" id="inChat" placeholder="Écrire un message…" style="flex:1; margin:0;">
+          <button class="btn sm" id="btnChat">Envoyer</button>
+        </div>
+      </div>
+
+      <div class="formateur-only hidden" style="text-align:center; margin:18px 0;">
+        <button class="btn danger" id="btnStopDirect">⏹️ Terminer la séance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Onglet Exercices ===== -->
+  <div id="tab-exos" class="wrap tab hidden">
+    <div class="card">
+      <div class="eyebrow">Travail personnel</div>
+      <h1>✏️ Exercices</h1>
+      <p class="muted small eleve-only">Réponds en texte, ou envoie une photo de ton travail (calculs, mesures, câblage). Le formateur corrige et tu reçois ta note ici.</p>
+    </div>
+    <div class="card hidden formateur-only" id="cardAjoutExo">
+      <h2>➕ Donner un exercice</h2>
+      <label>Titre</label>
+      <input type="text" id="exoTitre" placeholder="Ex : Calculs de redressement">
+      <label>Énoncé</label>
+      <textarea id="exoEnonce" placeholder="Ex : 1) On redresse du 48 V AC avec un pont…"></textarea>
+      <button class="btn" id="btnAjoutExo">Publier l'exercice</button>
+    </div>
+    <div id="listeExos"></div>
+  </div>
+
+</div>
+
+<!-- ===== Barre d'onglets ===== -->
+<div class="tabbar hidden" id="tabbar">
+  <button data-tab="accueil" class="active"><span class="ico">🏠</span>Accueil</button>
+  <button data-tab="cours"><span class="ico">📚</span>Cours</button>
+  <button data-tab="direct"><span class="ico">🔴</span>Direct</button>
+  <button data-tab="exos"><span class="ico">✏️</span>Exercices</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+/* ============================================================================
+   🔧 CONFIGURATION — À REMPLIR PAR LE FORMATEUR (une seule fois)
+   1) Coller ici le firebaseConfig de ton projet (MécaSchool réutilisable) :
+============================================================================ */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBVJZVDaxLO6kGcDKwJFHxQ6Dh9IZbu0SU",
+  authDomain: "mecaschool-116bc.firebaseapp.com",
+  projectId: "mecaschool-116bc",
+  storageBucket: "mecaschool-116bc.firebasestorage.app",
+  messagingSenderId: "285313915644",
+  appId: "1:285313915644:web:792f9b57da09583efcd579"
+};
+
+/* 2) Code PIN du formateur et code d'accès de la classe : */
+var PIN_FORMATEUR = "1523";
+var CODE_CLASSE   = "HME2026";
+
+/* 3) Règles Firestore recommandées (console Firebase → Firestore → Règles) :
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+   (accès réservé aux utilisateurs connectés anonymement via l'app ;
+    le code de classe filtre ensuite qui entre)
+============================================================================ */
+
+(function () {
+  "use strict";
+
+  /* ---------- Helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  }); }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2600);
+  }
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  /* ---------- État local ---------- */
+  var moi = { nom: read("mc_nom") || "", role: read("mc_role") || "", entre: read("mc_entre") === "1" };
+  var db = null, etatDoc = null, etat = null;
+  var unsub = { etat: null, chat: null, quiz: null, cours: null, exos: null, soum: null };
+  var coursCache = [], exosCache = [], soumCache = [];
+  var dernierModuleVu = null;
+
+  /* ---------- Démarrage ---------- */
+  if (!FIREBASE_CONFIG.apiKey) {
+    $("screen-setup").classList.remove("hidden");
+    return;
+  }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  etatDoc = db.collection("plateforme").doc("etat");
+
+  /* Connexion automatique : l'app utilise un compte technique partagé.
+     Elle le crée toute seule au premier lancement (le fournisseur
+     E-mail/Mot de passe est déjà activé dans le projet).
+     → AUCUNE configuration à faire dans la console Firebase. */
+  var TECH_EMAIL = "plateforme.classe.hme@mecaschool-app.web.app";
+  var TECH_PASS  = "Hme-Classe-2026-Kedougou-7431";
+  function connexionTechnique() {
+    var auth = firebase.auth();
+    auth.signInWithEmailAndPassword(TECH_EMAIL, TECH_PASS).catch(function (e) {
+      if (e.code === "auth/user-not-found" || e.code === "auth/invalid-credential" || e.code === "auth/invalid-login-credentials") {
+        auth.createUserWithEmailAndPassword(TECH_EMAIL, TECH_PASS).catch(function (e2) {
+          if (e2.code === "auth/email-already-in-use") {
+            auth.signInWithEmailAndPassword(TECH_EMAIL, TECH_PASS).catch(function () {
+              toast("⚠️ Connexion impossible — envoie ce message à ton assistant : " + e2.code);
+            });
+          } else {
+            toast("⚠️ Problème de connexion : " + e2.code);
+          }
+        });
+      } else {
+        toast("⚠️ Problème de connexion : " + e.code);
+      }
+    });
+  }
+  connexionTechnique();
+
+  /* Auto-diagnostic : dès que la connexion réussit, on teste l'accès à la base.
+     Si les règles bloquent, un message clair s'affiche. */
+  firebase.auth().onAuthStateChanged(function (u) {
+    if (!u) return;
+    db.collection("plateforme").doc("diagnostic").set({ ping: Date.now() }, { merge: true })
+      .then(function () { console.log("Accès base OK"); })
+      .catch(function (e) {
+        if (e.code === "permission-denied") {
+          alert("⚠️ La base de données refuse l'accès (règles Firestore).\n\nMontre ce message à ton assistant, ou dans la console Firebase → Firestore → Règles, autorise les utilisateurs connectés (request.auth != null), puis Publier.");
+        }
+      });
+  });
+
+  if (moi.entre && moi.nom) { entrerApp(); } else { $("screen-login").classList.remove("hidden"); }
+
+  /* ---------- Connexion ---------- */
+  $("btnJoin").addEventListener("click", function () {
+    var nom = $("inNom").value.trim();
+    var code = $("inCode").value.trim().toUpperCase();
+    if (nom.length < 2) { toast("Écris ton nom complet"); return; }
+    if (code !== CODE_CLASSE.toUpperCase()) { toast("❌ Code de classe incorrect"); return; }
+    moi = { nom: nom, role: "eleve", entre: true };
+    store("mc_nom", nom); store("mc_role", "eleve"); store("mc_entre", "1");
+    db.collection("eleves").doc(nom).set({ nom: nom, dernierAcces: Date.now() }, { merge: true });
+    entrerApp();
+  });
+  $("btnLoginFormateur").addEventListener("click", function () {
+    var p = prompt("Code PIN formateur :");
+    if (p !== PIN_FORMATEUR) { if (p !== null) toast("❌ PIN incorrect"); return; }
+    moi = { nom: "Gora Fall (formateur)", role: "formateur", entre: true };
+    store("mc_nom", moi.nom); store("mc_role", "formateur"); store("mc_entre", "1");
+    entrerApp();
+  });
+  $("btnLogout").addEventListener("click", function () {
+    store("mc_entre", "0");
+    location.reload();
+  });
+
+  function entrerApp() {
+    $("screen-login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    $("tabbar").classList.remove("hidden");
+    var badge = $("roleBadge");
+    badge.classList.remove("hidden");
+    if (moi.role === "formateur") {
+      badge.textContent = "🔐 Formateur";
+      badge.classList.add("formateur");
+      document.querySelectorAll(".formateur-only").forEach(function (el) { el.classList.remove("hidden"); });
+      document.querySelectorAll(".eleve-only").forEach(function (el) { el.classList.add("hidden"); });
+    } else {
+      badge.textContent = "👤 " + moi.nom.split(" ")[0];
+    }
+    $("helloTitre").textContent = "Bonjour " + moi.nom.split(" ")[0] + " 👋";
+    ecouterEtat();
+    ecouterCours();
+    ecouterExercices();
+  }
+
+  /* ---------- Onglets ---------- */
+  document.querySelectorAll(".tabbar button").forEach(function (b) {
+    b.addEventListener("click", function () { montrerOnglet(b.getAttribute("data-tab")); });
+  });
+  function montrerOnglet(nom) {
+    document.querySelectorAll(".tab").forEach(function (t) { t.classList.add("hidden"); });
+    $("tab-" + nom).classList.remove("hidden");
+    document.querySelectorAll(".tabbar button").forEach(function (b) {
+      b.classList.toggle("active", b.getAttribute("data-tab") === nom);
+    });
+    window.scrollTo(0, 0);
+  }
+  $("btnGoDirect").addEventListener("click", function () { montrerOnglet("direct"); });
+
+  /* ============================================================
+     ÉTAT GLOBAL (séance en direct, module, annonce, quiz)
+  ============================================================ */
+  function ecouterEtat() {
+    unsub.etat = etatDoc.onSnapshot(function (snap) {
+      etat = snap.exists ? snap.data() : {};
+      majDirect();
+    });
+  }
+
+  function majDirect() {
+    var live = etat && etat.sessionActive;
+    $("liveDot").classList.toggle("on", !!live);
+    $("liveTxt").textContent = live ? "EN DIRECT" : "Hors direct";
+    $("cardPasDeDirect").classList.toggle("hidden", !!live);
+    $("zoneDirect").classList.toggle("hidden", !live);
+    $("btnGoDirect").classList.toggle("hidden", !live);
+    $("helloSession").textContent = live
+      ? "🔴 Une séance est en cours : " + (etat.coursTitre || "cours") + "."
+      : "Aucune séance en direct pour le moment.";
+
+    /* Annonce */
+    var a = etat && etat.annonce;
+    ["helloAnnonce", "directAnnonce"].forEach(function (id) {
+      var el = $(id);
+      if (a) { el.innerHTML = "📣 <strong>Annonce :</strong> " + esc(a); el.classList.remove("hidden"); }
+      else { el.classList.add("hidden"); }
+    });
+
+    if (!live) { arreterEcouteSeance(); return; }
+
+    /* Console module */
+    var n = etat.moduleDebloque || 1;
+    var total = etat.nbModules || 11;
+    var numEl = $("moduleNum");
+    if (dernierModuleVu !== null && dernierModuleVu !== n && moi.role !== "formateur") {
+      toast("🔓 Module " + n + " débloqué !");
+    }
+    if (dernierModuleVu !== n) {
+      numEl.classList.add("bump");
+      setTimeout(function () { numEl.classList.remove("bump"); }, 300);
+    }
+    dernierModuleVu = n;
+    numEl.textContent = n;
+    $("directCoursTitre").textContent = etat.coursTitre || "Séance en direct";
+    var rail = $("moduleRail");
+    rail.innerHTML = "";
+    for (var i = 1; i <= total; i++) {
+      var s = document.createElement("span");
+      if (i <= n) s.className = "done";
+      rail.appendChild(s);
+    }
+    var btn = $("btnOuvrirCours");
+    if (etat.coursUrl) { btn.href = etat.coursUrl; btn.classList.remove("hidden"); }
+    else { btn.classList.add("hidden"); }
+
+    demarrerEcouteSeance();
+    majQuiz();
+  }
+
+  /* ---------- Commandes formateur : séance ---------- */
+  $("btnStartDirect").addEventListener("click", function () {
+    var sel = $("selCoursDirect");
+    var c = coursCache[sel.selectedIndex] || {};
+    etatDoc.set({
+      sessionActive: true,
+      coursTitre: c.titre || "Séance",
+      coursUrl: c.url || "",
+      moduleDebloque: 1,
+      nbModules: parseInt($("inNbModules").value, 10) || 11,
+      annonce: "",
+      quiz: null,
+      debut: Date.now()
+    }, { merge: true });
+    toast("▶️ Séance démarrée");
+  });
+  $("btnStopDirect").addEventListener("click", function () {
+    if (!confirm("Terminer la séance pour tous les élèves ?")) return;
+    etatDoc.set({ sessionActive: false, quiz: null, annonce: "" }, { merge: true });
+  });
+  $("btnModulePlus").addEventListener("click", function () {
+    var n = (etat.moduleDebloque || 1) + 1;
+    if (n > (etat.nbModules || 11)) { toast("Dernier module atteint"); return; }
+    etatDoc.set({ moduleDebloque: n }, { merge: true });
+  });
+  $("btnModuleMoins").addEventListener("click", function () {
+    var n = Math.max(1, (etat.moduleDebloque || 1) - 1);
+    etatDoc.set({ moduleDebloque: n }, { merge: true });
+  });
+  $("btnEnvoyerAnnonce").addEventListener("click", function () {
+    var t = $("inAnnonce").value.trim();
+    if (!t) return;
+    etatDoc.set({ annonce: t }, { merge: true });
+    $("inAnnonce").value = "";
+  });
+  $("btnEffacerAnnonce").addEventListener("click", function () {
+    etatDoc.set({ annonce: "" }, { merge: true });
+  });
+
+  /* ============================================================
+     TCHAT
+  ============================================================ */
+  function demarrerEcouteSeance() {
+    if (unsub.chat) return;
+    unsub.chat = db.collection("messages").orderBy("ts", "desc").limit(60)
+      .onSnapshot(function (snap) {
+        var box = $("chatBox");
+        var msgs = [];
+        snap.forEach(function (d) { msgs.push(d.data()); });
+        msgs.reverse();
+        box.innerHTML = msgs.map(function (m) {
+          var cls = "msg" + (m.auteur === moi.nom ? " me" : "") + (m.role === "formateur" ? " formateur" : "");
+          return '<div class="' + cls + '"><span class="who">' + esc(m.role === "formateur" ? "🔐 " + m.auteur : m.auteur) + '</span>' + esc(m.texte) + '</div>';
+        }).join("");
+        box.scrollTop = box.scrollHeight;
+      });
+  }
+  function arreterEcouteSeance() {
+    if (unsub.chat) { unsub.chat(); unsub.chat = null; }
+    if (unsub.quiz) { unsub.quiz(); unsub.quiz = null; }
+    dernierModuleVu = null;
+  }
+  function envoyerChat() {
+    var t = $("inChat").value.trim();
+    if (!t) return;
+    db.collection("messages").add({ auteur: moi.nom, role: moi.role, texte: t.slice(0, 300), ts: Date.now() });
+    $("inChat").value = "";
+  }
+  $("btnChat").addEventListener("click", envoyerChat);
+  $("inChat").addEventListener("keydown", function (e) { if (e.key === "Enter") envoyerChat(); });
+
+  /* ============================================================
+     QUIZ EN DIRECT
+  ============================================================ */
+  $("btnLancerQuiz").addEventListener("click", function () {
+    var q = $("qQuestion").value.trim();
+    var lignes = $("qOptions").value.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+    if (!q || lignes.length < 2) { toast("Question + au moins 2 réponses"); return; }
+    var bonne = -1;
+    var opts = lignes.map(function (l, i) {
+      if (l.indexOf("✅") === 0) { bonne = i; return l.replace("✅", "").trim(); }
+      return l;
+    });
+    if (bonne < 0) { toast("Marque la bonne réponse avec ✅"); return; }
+    etatDoc.set({ quiz: { id: Date.now(), question: q, options: opts, bonne: bonne, revele: false, actif: true } }, { merge: true });
+    $("qQuestion").value = ""; $("qOptions").value = "";
+  });
+  $("btnRevelerQuiz").addEventListener("click", function () {
+    var qz = etat.quiz; if (!qz) return;
+    qz.revele = true;
+    etatDoc.set({ quiz: qz }, { merge: true });
+  });
+  $("btnFermerQuiz").addEventListener("click", function () {
+    etatDoc.set({ quiz: null }, { merge: true });
+  });
+
+  function majQuiz() {
+    var qz = etat.quiz;
+    var actif = qz && qz.actif;
+
+    /* --- côté formateur : compteur de réponses en direct --- */
+    if (moi.role === "formateur") {
+      $("quizCreation").classList.toggle("hidden", !!actif);
+      $("quizResultats").classList.toggle("hidden", !actif);
+      if (actif) {
+        $("qrQuestion").textContent = qz.question;
+        if (unsub.quiz) unsub.quiz();
+        unsub.quiz = db.collection("reponsesQuiz").where("quizId", "==", qz.id)
+          .onSnapshot(function (snap) {
+            var compte = qz.options.map(function () { return 0; });
+            snap.forEach(function (d) { var c = d.data().choix; if (compte[c] !== undefined) compte[c]++; });
+            var total = snap.size;
+            $("qrBars").innerHTML = qz.options.map(function (o, i) {
+              var pct = total ? Math.round(compte[i] / total * 100) : 0;
+              var lab = (qz.revele && i === qz.bonne ? "🎯 " : "") + esc(o);
+              return '<div class="bar-line"><span style="min-width:110px;">' + lab + '</span><span class="bar"><i style="width:' + pct + '%;"></i></span><strong>' + compte[i] + '</strong></div>';
+            }).join("");
+            $("qrTotal").textContent = total + " réponse(s) reçue(s)";
+          });
+      }
+      return;
+    }
+
+    /* --- côté élève --- */
+    $("quizAttente").classList.toggle("hidden", !!actif);
+    $("quizZone").classList.toggle("hidden", !actif);
+    if (!actif) return;
+    $("quizQuestion").textContent = qz.question;
+    var dejaCle = "mc_quiz_" + qz.id;
+    var monChoix = read(dejaCle);
+    var zone = $("quizOptions");
+    zone.innerHTML = "";
+    qz.options.forEach(function (o, i) {
+      var b = document.createElement("button");
+      b.className = "quiz-opt" + (String(i) === monChoix ? " sel" : "");
+      b.textContent = (qz.revele && i === qz.bonne ? "🎯 " : "") + o;
+      b.disabled = monChoix !== null;
+      b.addEventListener("click", function () {
+        store(dejaCle, String(i));
+        db.collection("reponsesQuiz").add({ quizId: qz.id, eleve: moi.nom, choix: i, ts: Date.now() });
+        majQuiz();
+      });
+      zone.appendChild(b);
+    });
+    $("quizEtatReponse").textContent = monChoix !== null
+      ? (qz.revele
+          ? (parseInt(monChoix, 10) === qz.bonne ? "✅ Bonne réponse, bravo !" : "❌ Ce n'était pas ça — la bonne réponse porte 🎯.")
+          : "Réponse envoyée ✔ — en attente du résultat.")
+      : "Choisis une réponse (un seul essai).";
+  }
+
+  /* ============================================================
+     COURS
+  ============================================================ */
+  function ecouterCours() {
+    unsub.cours = db.collection("cours").orderBy("ordre").onSnapshot(function (snap) {
+      coursCache = [];
+      snap.forEach(function (d) { var c = d.data(); c.id = d.id; coursCache.push(c); });
+      var html = coursCache.map(function (c) {
+        var suppr = moi.role === "formateur"
+          ? '<button class="btn danger sm" data-del="' + c.id + '">Supprimer</button>' : "";
+        return '<div class="item"><h3>📘 ' + esc(c.titre) + '</h3>' +
+          '<p class="muted small">' + esc(c.description || "") + '</p>' +
+          '<div class="row"><a class="btn sm" href="' + esc(c.url) + '" target="_blank" rel="noopener">Ouvrir le cours</a>' + suppr + '</div></div>';
+      }).join("") || '<div class="card muted">Aucun cours publié pour le moment.</div>';
+      $("listeCours").innerHTML = html;
+      document.querySelectorAll("[data-del]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (confirm("Supprimer ce cours de la bibliothèque ?")) db.collection("cours").doc(b.getAttribute("data-del")).delete();
+        });
+      });
+      var sel = $("selCoursDirect");
+      sel.innerHTML = coursCache.map(function (c) { return "<option>" + esc(c.titre) + "</option>"; }).join("") || "<option>— aucun cours —</option>";
+    });
+  }
+  $("btnAjoutCours").addEventListener("click", function () {
+    var t = $("coursTitre").value.trim(), u = $("coursUrl").value.trim();
+    if (!t || !u) { toast("Titre et lien obligatoires"); return; }
+    db.collection("cours").add({ titre: t, description: $("coursDesc").value.trim(), url: u, ordre: Date.now() });
+    $("coursTitre").value = ""; $("coursDesc").value = ""; $("coursUrl").value = "";
+    toast("📘 Cours publié");
+  });
+
+  /* ============================================================
+     EXERCICES & CORRECTIONS
+  ============================================================ */
+  $("btnAjoutExo").addEventListener("click", function () {
+    var t = $("exoTitre").value.trim(), e = $("exoEnonce").value.trim();
+    if (!t || !e) { toast("Titre et énoncé obligatoires"); return; }
+    db.collection("exercices").add({ titre: t, enonce: e, creeLe: Date.now() });
+    $("exoTitre").value = ""; $("exoEnonce").value = "";
+    toast("✏️ Exercice publié");
+  });
+
+  function ecouterExercices() {
+    unsub.exos = db.collection("exercices").orderBy("creeLe", "desc").onSnapshot(function (snap) {
+      exosCache = [];
+      snap.forEach(function (d) { var x = d.data(); x.id = d.id; exosCache.push(x); });
+      ecouterSoumissions();
+    });
+  }
+  function ecouterSoumissions() {
+    if (unsub.soum) unsub.soum();
+    var q = moi.role === "formateur"
+      ? db.collection("soumissions")
+      : db.collection("soumissions").where("eleve", "==", moi.nom);
+    unsub.soum = q.onSnapshot(function (snap) {
+      soumCache = [];
+      snap.forEach(function (d) { var s = d.data(); s.id = d.id; soumCache.push(s); });
+      afficherExos();
+    });
+  }
+
+  function afficherExos() {
+    var zone = $("listeExos");
+    if (!exosCache.length) { zone.innerHTML = '<div class="card muted">Aucun exercice pour le moment.</div>'; return; }
+
+    zone.innerHTML = exosCache.map(function (x) {
+      var inner;
+      if (moi.role === "formateur") {
+        var soums = soumCache.filter(function (s) { return s.exerciceId === x.id; })
+          .sort(function (a, b) { return (a.note == null ? 0 : 1) - (b.note == null ? 0 : 1) || b.ts - a.ts; });
+        var enAttente = soums.filter(function (s) { return s.note == null; }).length;
+        inner = '<p class="small"><span class="pill ' + (enAttente ? "warn" : "ok") + '">' +
+          soums.length + ' rendu(s) · ' + enAttente + ' à corriger</span></p>' +
+          soums.map(function (s) {
+            var corr = s.note != null
+              ? '<p><span class="note-big">' + esc(s.note) + '/20</span> — ' + esc(s.commentaire || "") + '</p>'
+              : '<div class="row"><input type="number" min="0" max="20" placeholder="/20" style="width:90px;margin:0;" id="note-' + s.id + '">' +
+                '<input type="text" placeholder="Commentaire" style="flex:1;margin:0;" id="comm-' + s.id + '">' +
+                '<button class="btn sm" data-corr="' + s.id + '">Noter</button></div>';
+            return '<div class="item"><h3>👤 ' + esc(s.eleve) + '</h3>' +
+              (s.texte ? "<p>" + esc(s.texte) + "</p>" : "") +
+              (s.photo ? '<img class="photo-thumb" src="' + s.photo + '" alt="Travail de ' + esc(s.eleve) + '">' : "") +
+              corr + "</div>";
+          }).join("") +
+          '<button class="btn danger sm" data-delexo="' + x.id + '">Supprimer l\'exercice</button>';
+      } else {
+        var mienne = soumCache.filter(function (s) { return s.exerciceId === x.id; })[0];
+        if (mienne) {
+          inner = mienne.note != null
+            ? '<p>✅ Corrigé : <span class="note-big">' + esc(mienne.note) + '/20</span></p><p class="small">' + esc(mienne.commentaire || "") + "</p>"
+            : '<p class="pill warn">Rendu ✔ — en attente de correction</p>';
+        } else {
+          inner = '<textarea id="rep-' + x.id + '" placeholder="Ta réponse…"></textarea>' +
+            '<div class="row"><label class="btn secondary sm" style="cursor:pointer;">📷 Joindre une photo' +
+            '<input type="file" accept="image/*" capture="environment" id="photo-' + x.id + '" style="display:none;"></label>' +
+            '<span class="small muted" id="photoNom-' + x.id + '"></span></div>' +
+            '<button class="btn sm" style="margin-top:10px;" data-rendre="' + x.id + '">Rendre mon travail</button>';
+        }
+      }
+      return '<div class="card"><h2>' + esc(x.titre) + '</h2><p style="white-space:pre-wrap;">' + esc(x.enonce) + "</p>" + inner + "</div>";
+    }).join("");
+
+    /* — actions élève : rendre — */
+    document.querySelectorAll("[data-rendre]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var xid = b.getAttribute("data-rendre");
+        var texte = $("rep-" + xid).value.trim();
+        var fileInput = $("photo-" + xid);
+        var fichier = fileInput.files[0];
+        if (!texte && !fichier) { toast("Écris une réponse ou joins une photo"); return; }
+        b.disabled = true; b.textContent = "Envoi…";
+        var envoyer = function (photoB64) {
+          db.collection("soumissions").add({
+            exerciceId: xid, eleve: moi.nom, texte: texte, photo: photoB64 || "", ts: Date.now(), note: null, commentaire: ""
+          }).then(function () { toast("✅ Travail rendu !"); });
+        };
+        if (fichier) compresserPhoto(fichier, envoyer);
+        else envoyer("");
+      });
+    });
+    document.querySelectorAll("[id^='photo-']").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        var lbl = $("photoNom-" + inp.id.replace("photo-", ""));
+        if (lbl && inp.files[0]) lbl.textContent = "📎 " + inp.files[0].name;
+      });
+    });
+
+    /* — actions formateur : noter / supprimer — */
+    document.querySelectorAll("[data-corr]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var sid = b.getAttribute("data-corr");
+        var note = parseFloat($("note-" + sid).value);
+        if (isNaN(note) || note < 0 || note > 20) { toast("Note entre 0 et 20"); return; }
+        db.collection("soumissions").doc(sid).update({
+          note: note, commentaire: $("comm-" + sid).value.trim(), corrigeLe: Date.now()
+        }).then(function () { toast("✅ Correction envoyée"); });
+      });
+    });
+    document.querySelectorAll("[data-delexo]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (confirm("Supprimer cet exercice et ses rendus ?")) db.collection("exercices").doc(b.getAttribute("data-delexo")).delete();
+      });
+    });
+
+    /* — stat accueil élève — */
+    if (moi.role !== "formateur") {
+      var corriges = soumCache.filter(function (s) { return s.note != null; }).length;
+      $("statExos").textContent = exosCache.length + " exercice(s) · " + soumCache.length + " rendu(s) · " + corriges + " corrigé(s)";
+    } else {
+      var attente = soumCache.filter(function (s) { return s.note == null; }).length;
+      $("statExos").textContent = soumCache.length + " rendu(s) au total · " + attente + " en attente de correction";
+    }
+  }
+
+  /* ---------- Compression photo (reste sous la limite Firestore ~1 Mo) ---------- */
+  function compresserPhoto(fichier, cb) {
+    var img = new Image();
+    var reader = new FileReader();
+    reader.onload = function () { img.src = reader.result; };
+    img.onload = function () {
+      var max = 1000;
+      var ratio = Math.min(1, max / Math.max(img.width, img.height));
+      var cv = document.createElement("canvas");
+      cv.width = Math.round(img.width * ratio);
+      cv.height = Math.round(img.height * ratio);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      var out = cv.toDataURL("image/jpeg", 0.6);
+      if (out.length > 850000) out = cv.toDataURL("image/jpeg", 0.35);
+      if (out.length > 950000) { toast("Photo trop lourde, reprends-la de plus loin"); cb(""); return; }
+      cb(out);
+    };
+    img.onerror = function () { toast("Photo illisible"); cb(""); };
+    reader.readAsDataURL(fichier);
+  }
+
+})();
+</script>
+</body>
+</html>
