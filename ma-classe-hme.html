@@ -455,6 +455,19 @@ service cloud.firestore {
   function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
+  /* ---------- Affichage clair des erreurs de base ---------- */
+  var erreurDejaMontree = false;
+  function montrerErreurBase(e) {
+    console.error(e);
+    if (e && e.code === "permission-denied") {
+      if (erreurDejaMontree) { toast("⛔ Accès refusé par les règles de la base"); return; }
+      erreurDejaMontree = true;
+      alert("⛔ ACCÈS REFUSÉ PAR LA BASE DE DONNÉES\n\nLes règles Firestore de ton projet n'autorisent pas les collections de cette plateforme.\n\nSolution (2 minutes) : console Firebase → Firestore Database → onglet Règles → tape sur la version active (l'étoile ⭐) pour voir le texte → bouton Modifier → AJOUTE ce bloc juste avant la dernière accolade fermante :\n\nmatch /plateforme/{d} { allow read, write: if request.auth != null; }\nmatch /cours/{d} { allow read, write: if request.auth != null; }\nmatch /messages/{d} { allow read, write: if request.auth != null; }\nmatch /exercices/{d} { allow read, write: if request.auth != null; }\nmatch /soumissions/{d} { allow read, write: if request.auth != null; }\nmatch /reponsesQuiz/{d} { allow read, write: if request.auth != null; }\nmatch /eleves/{d} { allow read, write: if request.auth != null; }\n\npuis Publier. Tes règles MécaSchool existantes ne changent pas.");
+    } else {
+      toast("⚠️ Erreur base : " + (e && e.code ? e.code : "inconnue"));
+    }
+  }
+
   /* ---------- État local ---------- */
   var moi = { nom: read("mc_nom") || "", role: read("mc_role") || "", entre: read("mc_entre") === "1" };
   var db = null, etatDoc = null, etat = null;
@@ -576,7 +589,7 @@ service cloud.firestore {
     unsub.etat = etatDoc.onSnapshot(function (snap) {
       etat = snap.exists ? snap.data() : {};
       majDirect();
-    });
+    }, montrerErreurBase);
   }
 
   function majDirect() {
@@ -802,14 +815,17 @@ service cloud.firestore {
       });
       var sel = $("selCoursDirect");
       sel.innerHTML = coursCache.map(function (c) { return "<option>" + esc(c.titre) + "</option>"; }).join("") || "<option>— aucun cours —</option>";
-    });
+    }, montrerErreurBase);
   }
   $("btnAjoutCours").addEventListener("click", function () {
     var t = $("coursTitre").value.trim(), u = $("coursUrl").value.trim();
     if (!t || !u) { toast("Titre et lien obligatoires"); return; }
-    db.collection("cours").add({ titre: t, description: $("coursDesc").value.trim(), url: u, ordre: Date.now() });
-    $("coursTitre").value = ""; $("coursDesc").value = ""; $("coursUrl").value = "";
-    toast("📘 Cours publié");
+    db.collection("cours").add({ titre: t, description: $("coursDesc").value.trim(), url: u, ordre: Date.now() })
+      .then(function () {
+        $("coursTitre").value = ""; $("coursDesc").value = ""; $("coursUrl").value = "";
+        toast("📘 Cours publié");
+      })
+      .catch(montrerErreurBase);
   });
 
   /* ============================================================
@@ -818,9 +834,12 @@ service cloud.firestore {
   $("btnAjoutExo").addEventListener("click", function () {
     var t = $("exoTitre").value.trim(), e = $("exoEnonce").value.trim();
     if (!t || !e) { toast("Titre et énoncé obligatoires"); return; }
-    db.collection("exercices").add({ titre: t, enonce: e, creeLe: Date.now() });
-    $("exoTitre").value = ""; $("exoEnonce").value = "";
-    toast("✏️ Exercice publié");
+    db.collection("exercices").add({ titre: t, enonce: e, creeLe: Date.now() })
+      .then(function () {
+        $("exoTitre").value = ""; $("exoEnonce").value = "";
+        toast("✏️ Exercice publié");
+      })
+      .catch(montrerErreurBase);
   });
 
   function ecouterExercices() {
@@ -828,7 +847,7 @@ service cloud.firestore {
       exosCache = [];
       snap.forEach(function (d) { var x = d.data(); x.id = d.id; exosCache.push(x); });
       ecouterSoumissions();
-    });
+    }, montrerErreurBase);
   }
   function ecouterSoumissions() {
     if (unsub.soum) unsub.soum();
@@ -839,7 +858,7 @@ service cloud.firestore {
       soumCache = [];
       snap.forEach(function (d) { var s = d.data(); s.id = d.id; soumCache.push(s); });
       afficherExos();
-    });
+    }, montrerErreurBase);
   }
 
   function afficherExos() {
